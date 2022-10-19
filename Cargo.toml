@@ -1,0 +1,15 @@
+[package]
+name = "quick_hash"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "quickhash"
+path = "src/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dialoguer = "0.10.2"
+sha2 = "0.10.6"
+md5 = "0.7.0"
