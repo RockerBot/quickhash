@@ -92,7 +92,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
                 if check_file_w == 1 {
-                    let fi = "./sha256.checksum";
+                    let fi = "sha256.checksum";
                     println!("Creating {}", fi);
                     let mut file = File::create(fi).expect("Creation Failed");
                     for p in paths? {
@@ -104,18 +104,23 @@ fn main() -> std::io::Result<()> {
                         // if path_str.chars().nth(0).unwrap() == '.'{
                         //     continue;
                         // }
-                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
+                            //println!("Hello");
                             continue;
                         }
                         let code = algorithms::calc_sha256(path_str);
                         println!("{}", path_str);
+                        //file.write_all(path_str.as_bytes())?;
+                        
                         file.write_all(code.as_bytes())?;
+                        file.write_all(b"  ")?;
+                        file.write_all(path_str.as_bytes())?;
                         file.write_all(b"\n")?;
                     }
 
                 }
                 else if check_file_r == 1 {
-                    let fi = "./sha256.checksum";
+                    let fi = "sha256.checksum";
                     println!("Reading From {}", fi);
                     let lines = lines_from_file(fi);
                     let mut i=0;
@@ -126,11 +131,13 @@ fn main() -> std::io::Result<()> {
                         let path_str = path.to_str().unwrap();
                         let path_str = &path_str[2..];
                         
-                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
                             i = i+1;
                             continue;
                         }
-                        if lines[j] == algorithms::calc_sha256(path_str){
+                        let f_name = &lines[j][66..];
+                        //println!("{:?}", f_name);
+                        if lines[j][..64] == algorithms::calc_sha256(path_str) && f_name == path_str {
                             println!("{} matches", path_str);
                         }
                         else {
@@ -157,7 +164,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
                 if check_file_w == 1 {
-                    let fi = "./md5.checksum";
+                    let fi = "md5.checksum";
                     println!("Creating {}", fi);
                     let mut file = File::create(fi).expect("Creation Failed");
                     for p in paths? {
@@ -179,7 +186,7 @@ fn main() -> std::io::Result<()> {
 
                 }
                 else if check_file_r == 1 {
-                    let fi = "./md5.checksum";
+                    let fi = "md5.checksum";
                     println!("Reading From {}", fi);
                     let lines = lines_from_file(fi);
                     let mut i=0;
@@ -190,7 +197,7 @@ fn main() -> std::io::Result<()> {
                         let path_str = path.to_str().unwrap();
                         let path_str = &path_str[2..];
                         
-                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
                             i = i+1;
                             continue;
                         }
