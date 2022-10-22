@@ -49,6 +49,9 @@ fn main() -> std::io::Result<()> {
     else if arg1 == "checksum-file"{
         check_file_r = 1;
     } 
+    else{
+        filepath = arg1;
+    }
     let mut checksum = None; //either path or checksum
     if check_file_w == 1 || check_file_r == 1{
         checksum = std::env::args().nth(2);
@@ -72,7 +75,7 @@ fn main() -> std::io::Result<()> {
     // Makes a selection menu in the terminal with the available algs
     let selection = Select::with_theme(&ColorfulTheme::default())
         .items(&hash_algorithms)
-        .default(0)
+        .default(2)
         .interact_on_opt(&Term::stderr())?;
 
     match selection {
@@ -210,8 +213,15 @@ fn main() -> std::io::Result<()> {
                         j = j+1;
                     }
                 }
+                else{
+                    println!(
+                    "The MD5 checksum for the file is: {}",
+                    algorithms::calc_md5(filepath)
+                );
+                }
             }
-            else if hash_algorithms[index] == "SHA1" {
+            else if hash_algorithms[index] == "SHA-1" {
+                //println!("{}",check_file_w);
                 if check == 1 {
                     //println!("{:?}", checksum_str);
                     if algorithms::calc_sha1(filepath) == checksum_str {
@@ -267,6 +277,12 @@ fn main() -> std::io::Result<()> {
                         }
                         j = j+1;
                     }
+                }
+                else{
+                    println!(
+                    "The SHA1 checksum for the file is: {}",
+                    algorithms::calc_sha1(filepath)
+                );
                 }
             }
         }
