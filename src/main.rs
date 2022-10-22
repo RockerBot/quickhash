@@ -53,7 +53,7 @@ fn main() -> std::io::Result<()> {
         filepath = arg1;
     }
     let mut checksum = None; //either path or checksum
-    if check_file_w == 1 || check_file_r == 1{
+    if (check_file_w == 1 || check_file_r == 1) && checksum == None{
         checksum = std::env::args().nth(2);
     }
     else{
