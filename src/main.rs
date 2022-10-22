@@ -49,8 +49,11 @@ fn main() -> std::io::Result<()> {
     else if arg1 == "checksum-file"{
         check_file_r = 1;
     } 
+    else{
+        filepath = arg1;
+    }
     let mut checksum = None; //either path or checksum
-    if check_file_w == 1 || check_file_r == 1{
+    if (check_file_w == 1 || check_file_r == 1) && checksum == None{
         checksum = std::env::args().nth(2);
     }
     else{
@@ -67,7 +70,7 @@ fn main() -> std::io::Result<()> {
     let paths = std::fs::read_dir("./");
 
     // The available hash algorithms
-    let hash_algorithms = vec!["SHA-256", "MD5"];
+    let hash_algorithms = vec!["SHA-256", "MD5", "SHA-1"];
 
     // Makes a selection menu in the terminal with the available algs
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -209,6 +212,77 @@ fn main() -> std::io::Result<()> {
                         }
                         j = j+1;
                     }
+                }
+                else{
+                    println!(
+                    "The MD5 checksum for the file is: {}",
+                    algorithms::calc_md5(filepath)
+                );
+                }
+            }
+            else if hash_algorithms[index] == "SHA-1" {
+                //println!("{}",check_file_w);
+                if check == 1 {
+                    //println!("{:?}", checksum_str);
+                    if algorithms::calc_sha1(filepath) == checksum_str {
+                        println!("It's a match");
+                    }
+                    else{
+                        println!("It doesn't match");
+                    }
+                }
+                if check_file_w == 1 {
+                    let fi = "sha1.checksum";
+                    println!("Creating {}", fi);
+                    let mut file = File::create(fi).expect("Creation Failed");
+                    for p in paths? {
+                        //println!("{}", path.unwrap().path().display());
+                        let path = p?.path();
+                        // Get path string.
+                        let path_str = path.to_str().unwrap();
+                        let path_str = &path_str[2..];
+                        // if path_str.chars().nth(0).unwrap() == '.'{
+                        //     continue;
+                        // }
+                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                            continue;
+                        }
+                        let code = algorithms::calc_sha1(path_str);
+                        file.write_all(code.as_bytes())?;
+                        file.write_all(b"\n")?;
+                    }
+
+                }
+                else if check_file_r == 1 {
+                    let fi = "sha1.checksum";
+                    println!("Reading From {}", fi);
+                    let lines = lines_from_file(fi);
+                    let mut i=0;
+                    let mut j=0;
+                    for p in paths? {
+                        let path = p?.path();
+                        // Get path string.
+                        let path_str = path.to_str().unwrap();
+                        let path_str = &path_str[2..];
+                        
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
+                            i = i+1;
+                            continue;
+                        }
+                        if lines[j] == algorithms::calc_sha1(path_str){
+                            println!("{} matches", path_str);
+                        }
+                        else {
+                            println!("{} does not match", path_str);
+                        }
+                        j = j+1;
+                    }
+                }
+                else{
+                    println!(
+                    "The SHA1 checksum for the file is: {}",
+                    algorithms::calc_sha1(filepath)
+                );
                 }
             }
         }
