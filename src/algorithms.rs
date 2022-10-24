@@ -1,10 +1,10 @@
 use md5;
+use sha1::Sha1;
 use sha2::{Digest, Sha256};
-use sha1::{Sha1};
 
 pub fn calc_sha256(filepath: &str) -> String {
     //println!("{}", filepath);
-    
+
     let file_as_bytes = std::fs::read(filepath);
     let hash = Sha256::digest(file_as_bytes.unwrap());
 
