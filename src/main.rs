@@ -1,6 +1,7 @@
 use dialoguer::{console::Term, theme::ColorfulTheme, Select};
 use std::fs::File;
 use std::io::prelude::*;
+use std::time::{Instant};
 use std::process::exit;
 
 mod algorithms;
@@ -75,6 +76,7 @@ fn main() -> std::io::Result<()> {
         .default(0)
         .interact_on_opt(&Term::stderr())?;
 
+    let start = Instant::now();
     match selection {
         Some(index) => {
             if hash_algorithms[index] == "SHA-256" {
@@ -132,7 +134,7 @@ fn main() -> std::io::Result<()> {
                             i = i + 1;
                             continue;
                         }
-                        let f_name = &lines[j][66..];
+                        let f_name = &lines[j][66..]; // 256 bits
                         //println!("{:?}", f_name);
                         if lines[j][..64] == algorithms::calc_sha256(path_str) && f_name == path_str
                         {
@@ -170,11 +172,14 @@ fn main() -> std::io::Result<()> {
                         // if path_str.chars().nth(0).unwrap() == '.'{
                         //     continue;
                         // }
-                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
                             continue;
                         }
+                        println!("{}", path_str);
                         let code = algorithms::calc_md5(path_str);
                         file.write_all(code.as_bytes())?;
+                        file.write_all(b"  ")?;
+                        file.write_all(path_str.as_bytes())?;
                         file.write_all(b"\n")?;
                     }
                 } else if check_file_r == 1 {
@@ -193,12 +198,18 @@ fn main() -> std::io::Result<()> {
                             i = i + 1;
                             continue;
                         }
-                        if lines[j] == algorithms::calc_md5(path_str) {
+                        let f_name = &lines[j][34..]; // 128 bits
+                        // println!("{:?}", algorithms::calc_md5(path_str));
+                        // let ha = &lines[j][..32];
+                        // println!("{:?}", ha);
+                        if lines[j][..32] == algorithms::calc_md5(path_str) && f_name == path_str {
+
                             println!("{} matches", path_str);
                         } else {
                             println!("{} does not match", path_str);
                         }
-                        j = j + 1;
+                        i = i+1;
+                        j = j+1;
                     }
                 } else {
                     println!(
@@ -229,11 +240,15 @@ fn main() -> std::io::Result<()> {
                         // if path_str.chars().nth(0).unwrap() == '.'{
                         //     continue;
                         // }
-                        if std::fs::metadata(path_str).unwrap().is_dir() {
+                        if std::fs::metadata(path_str).unwrap().is_dir() || path_str == fi {
                             continue;
                         }
+
+                        println!("{}", path_str);
                         let code = algorithms::calc_sha1(path_str);
                         file.write_all(code.as_bytes())?;
+                        file.write_all(b"  ")?;
+                        file.write_all(path_str.as_bytes())?;
                         file.write_all(b"\n")?;
                     }
                 } else if check_file_r == 1 {
@@ -252,7 +267,10 @@ fn main() -> std::io::Result<()> {
                             i = i + 1;
                             continue;
                         }
-                        if lines[j] == algorithms::calc_sha1(path_str) {
+
+                        let f_name = &lines[j][42..]; // 160 bits
+                        if lines[j][..40] == algorithms::calc_sha1(path_str) && f_name == path_str{
+
                             println!("{} matches", path_str);
                         } else {
                             println!("{} does not match", path_str);
@@ -269,6 +287,7 @@ fn main() -> std::io::Result<()> {
         }
         None => println!("Aborted: You did not select an algorithm"),
     }
-
+    let duration = start.elapsed();
+    println!("Elapsed Time: {:?}", duration);
     Ok(())
 }
